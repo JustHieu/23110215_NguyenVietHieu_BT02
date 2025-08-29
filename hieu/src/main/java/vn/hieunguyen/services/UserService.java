@@ -9,7 +9,7 @@ public interface UserService {
 
     void insert(User user);
 
-    boolean register(String email, String password, String username, String fullname, String phone);
+    boolean register(String username, String password, String email, String fullname, String phone);
 
     boolean checkExistEmail(String email);
 

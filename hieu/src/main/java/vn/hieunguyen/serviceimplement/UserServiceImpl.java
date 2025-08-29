@@ -29,29 +29,30 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public boolean register(String email, String password, String username, String fullname, String phone) {
-        username = username == null ? null : username.trim();
-        email    = email == null ? null : email.trim().toLowerCase();
+    public boolean register(String username, String password, String email, String fullname, String phone) {
+        username = username == null ? "" : username.trim();
+        email    = email == null ? "" : email.trim().toLowerCase();
 
-        if (userDao.checkExistUsername(username) || userDao.checkExistEmail(email)) {
+        if (username.isEmpty() || email.isEmpty() || password == null || password.isEmpty())
             return false;
-        }
 
-        java.sql.Date date = new java.sql.Date(System.currentTimeMillis());
+        if (userDao.checkExistUsername(username) || userDao.checkExistEmail(email))
+            return false;
+
         User u = new User();
-        u.setEmail(email);
-        u.setPassWord(password); // hoặc hash như gợi ý BCrypt
-
         u.setUserName(username);
+        u.setPassWord(password);                // TODO: hash
+        u.setEmail(email);
         u.setFullName(fullname);
-        u.setAvatar(null);
-        u.setRoleid(5);
         u.setPhone(phone);
-        u.setCreatedDate(date);
+        u.setAvatar(null);
+        u.setRoleid(2);                         
+        u.setCreatedDate(new java.sql.Date(System.currentTimeMillis()));
 
-        userDao.insert(u); // nhớ bắt duplicate key trong DAO
+        userDao.insert(u);
         return true;
     }
+    
 
     @Override
     public boolean checkExistEmail(String email) {

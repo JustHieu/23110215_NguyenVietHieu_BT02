@@ -43,7 +43,7 @@
   <c:url var="loginUrl" value="/login" />
 
   <!-- Nếu có upload avatar thì cần enctype="multipart/form-data" -->
-  <form action="${registerUrl}" method="post" enctype="multipart/form-data" novalidate>
+  <form action="${registerUrl}" method="post" novalidate>
 
     <!-- USERNAME -->
     <div class="mb-3">
@@ -116,11 +116,7 @@
     </div>
 
     <!-- AVATAR (tùy chọn) -->
-    <div class="mb-3">
-      <label for="avatar" class="form-label">Ảnh đại diện (tùy chọn)</label>
-      <input id="avatar" type="file" name="avatar" class="form-control" accept="image/*">
-      <div class="input-help">Hỗ trợ jpg, png, gif…</div>
-    </div>
+   
 
     <button class="btn btn-primary w-100">Đăng ký</button>
   </form>

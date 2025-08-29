@@ -3,6 +3,8 @@ package vn.hieunguyen.daoimplement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 
 import vn.hieunguyen.configs.DBConnectSQL;
 import vn.hieunguyen.dao.UserDao;
@@ -11,24 +13,44 @@ import vn.hieunguyen.models.User;
 public class UserDaoImpl implements UserDao {
 
 	@Override
-	public void insert(User user) {
-		final String sql = "INSERT INTO [dbo].[User] (email, username, fullname, [password], avatar, roleid, phone, createddate) "
-				+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-		try (Connection conn = new DBConnectSQL().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+	public void insert(User u) {
+	    final String getNextIdSql = "SELECT ISNULL(MAX(id), 0) + 1 FROM [dbo].[User]";
+	    final String insertSql =
+	        "INSERT INTO [dbo].[User] " +
+	        "(id, username, [password], email, fullname, phone, avatar, roleid, createdDate) " +
+	        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-			ps.setString(1, user.getEmail());
-			ps.setString(2, user.getUserName());
-			ps.setString(3, user.getFullName());
-			ps.setString(4, user.getPassWord());
-			ps.setString(5, user.getAvatar());
-			ps.setInt(6, user.getRoleid());
-			ps.setString(7, user.getPhone());
-			ps.setDate(8, user.getCreatedDate()); // createddate nên là DATE/DATETIME
-			ps.executeUpdate();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+	    try (Connection con = new DBConnectSQL().getConnection()) {
+	        int nextId = 1;
+	        try (PreparedStatement ps = con.prepareStatement(getNextIdSql);
+	             ResultSet rs = ps.executeQuery()) {
+	            if (rs.next()) {
+	                nextId = rs.getInt(1);
+	            }
+	        }
+
+	        try (PreparedStatement ps = con.prepareStatement(insertSql)) {
+	            ps.setInt(1, nextId);
+	            ps.setString(2, u.getUserName());
+	            ps.setString(3, u.getPassWord());
+	            ps.setString(4, u.getEmail() == null ? null : u.getEmail().toLowerCase());
+	            ps.setNString(5, u.getFullName());
+	            ps.setString(6, u.getPhone());
+	            ps.setString(7, u.getAvatar());
+	            ps.setInt(8, u.getRoleid());
+	            ps.setDate(9, u.getCreatedDate());
+
+	            ps.executeUpdate();
+	            u.setId(nextId); // gán lại id vào object
+	        }
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	        throw new RuntimeException("Insert user failed: " + e.getMessage(), e);
+	    }
 	}
+
+
+
 
 	@Override
 	public User findByUserName(String username) {
@@ -157,11 +179,11 @@ public class UserDaoImpl implements UserDao {
 		u.setEmail(rs.getString("email"));
 		u.setUserName(rs.getString("username"));
 		u.setFullName(rs.getString("fullname"));
-		u.setPassWord(rs.getString("password")); // đã chọn [password] trong SELECT
+		u.setPassWord(rs.getString("password"));
 		u.setAvatar(rs.getString("avatar"));
 		u.setRoleid(rs.getInt("roleid"));
 		u.setPhone(rs.getString("phone"));
-		u.setCreatedDate(rs.getDate("createddate"));
+		u.setCreatedDate(rs.getDate("createdDate"));
 		return u;
 	}
 

@@ -34,4 +34,7 @@ public class DBConnectSQL {
         System.out.println("[DB] Connecting to: " + url);
         return DriverManager.getConnection(url, userID, password);
     }
+    public static void main(String[] args) {
+		
+	}
 }
